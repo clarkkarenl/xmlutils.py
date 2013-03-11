@@ -1,12 +1,22 @@
-﻿'''
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
+'''
 	xml2csv.py
 	Kailash Nadh, http://kailashnadh.name
 	October 2011
 	
 	License:		MIT License
 	Documentation:	http://kailashnadh.name/code/xmlutils.py
-'''
 
+        Modifications by Karen Clark to allow Unicode characters as delimiters
+        Probably not the most elegant solution, but allows me to convert 
+        large XML file into CSV, which can in turn be opened by Apache Calc (OpenOffice) 
+        March 11, 2013
+        
+'''        
+
+import sys
 import argparse, codecs, elementtree.ElementTree as et
 
 print "xml2sql.py by Kailash Nadh (http://kailashnadh.name)\n--help for help\n\n"
@@ -16,7 +26,7 @@ parser = argparse.ArgumentParser(description='Process some integers.')
 parser.add_argument('--input', dest='input_file', required=True, help='input xml filename')
 parser.add_argument('--output', dest='output_file', required=True, help='output csv filename')
 parser.add_argument('--tag', dest='tag', required=True, help='the record tag. eg: item')
-parser.add_argument('--delimiter', dest='delimiter', default=', ', help='delimiter character. (default=, comma-space)')
+parser.add_argument('--delimiter', dest=u'delimiter', default=', ', help='delimiter character. (default=, comma-space)')
 parser.add_argument('--ignore', dest='ignore', default='', nargs='+', help='list of tags to ignore')
 parser.add_argument('--header', dest='header', type=int, default=1, help='print csv header (1=yes, 0=no)? (default=1)')
 parser.add_argument('--encoding', dest='encoding', default='utf-8', help='character encoding (default=utf-8)')
@@ -63,11 +73,11 @@ for event, elem in context:
 	# end of traversing the record tag
 	if event == 'end' and elem.tag == args.tag and len(items) > 0:
 		# csv header (element tag names)
-		output.write('#' + (args.delimiter).join(tags) + '\n') if args.header == 1 and tagged == False else True
+		output.write('#' + args.delimiter.decode(sys.stdin.encoding).join(tags) + '\n') if args.header == 1 and tagged == False else True
 		tagged = True
 
 		# send the csv to buffer
-		output_buffer.append('\"' + ('\"' + args.delimiter + '\"').join(items) + '\"')
+		output_buffer.append(args.delimiter.decode(sys.stdin.encoding).join(items))
 		items = []
 		n+=1
 		
